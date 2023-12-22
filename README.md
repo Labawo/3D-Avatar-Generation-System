@@ -38,12 +38,12 @@ pip install -r requirements.txt
 ```
 ### 4. Database
 
-if you want to run it on MySQL
+if you want to run it on MySQL server create db named "3d-avataro-sistema" in your MySQL environment and edit your login information in settings.py
 ```bash
 pip install mysqlclient
 ```
 
-if you do not wish it change setting.py file DATABASE variable to:
+if you do not wish it change settings.py file DATABASE variable to:
 ```bash
 DATABASES = {
     'default': {
