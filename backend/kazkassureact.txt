@@ -1,0 +1,134 @@
+import { useEffect, useState, useRef } from 'react';
+import * as Three from 'three'; // Import Three.js
+import useAxios from '../utils/useAxios';
+
+const Project = () => {
+    const [res, setRes] = useState('');
+    const [posRes, setPostRes] = useState('');
+    const api = useAxios();
+    const canvasRef = useRef(null);
+    const textureRef = useRef(null);
+    const [texture, setTexture] = useState(null);
+    const sphereRotation = useRef({ x: 0, y: 0 });
+    const isDragging = useRef(false);
+
+    useEffect(() => {
+        const scene = new Three.Scene();
+        const camera = new Three.PerspectiveCamera(
+            35,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+        );
+    
+        const renderer = new Three.WebGLRenderer({ canvas: canvasRef.current });
+        renderer.setSize(700, 700);
+    
+        const geometry = new Three.SphereGeometry(1, 32, 32); // Sphere geometry
+        const material = new Three.MeshBasicMaterial({ map: texture, side: Three.DoubleSide }); // Basic material for the sphere
+    
+        const sphere = new Three.Mesh(geometry, material); // Create a sphere
+    
+        scene.add(sphere);
+        camera.position.z = 5;
+    
+        const handleMouseDown = (event) => {
+            isDragging.current = true;
+        };
+    
+        const handleMouseMove = (event) => {
+            if (!isDragging.current) return;
+    
+            sphereRotation.current.x += event.movementY * 0.01;
+            sphereRotation.current.y += event.movementX * 0.01;
+    
+            sphere.rotation.x = sphereRotation.current.x;
+            sphere.rotation.y = sphereRotation.current.y;
+        };
+    
+        const handleMouseUp = () => {
+            isDragging.current = false;
+        };
+    
+        const cleanup = () => {
+            if (canvasRef.current) {
+                canvasRef.current.removeEventListener('mousedown', handleMouseDown);
+            }
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    
+        if (canvasRef.current) {
+            canvasRef.current.addEventListener('mousedown', handleMouseDown);
+        }
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    
+        const animate = () => {
+            if (!isDragging.current) {
+                sphere.rotation.x += 0.01;
+                sphere.rotation.y += 0.01;
+            }
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        };
+    
+        animate();
+    
+        return cleanup;
+    }, [texture]);
+
+    const handleImageUpload = (e) => {
+        e.preventDefault();
+        const file = e.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const newTexture = new Three.TextureLoader().load(event.target.result, () => {
+                    console.log('Image loaded successfully.');
+                }, undefined, (err) => {
+                    console.error('Error loading image:', err);
+                });
+
+                setTexture(newTexture);
+            };
+
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await api.post('/save_project', {
+                text: e.target[0].value,
+            });
+            setPostRes(response.data.response);
+        } catch (error) {
+            setPostRes(error.response.data);
+        }
+    };
+
+    return (
+        <section>
+            <h1>3D Project</h1>
+            <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+            />
+            <canvas
+                ref={canvasRef}
+                style={{ width: '100%', height: '100%', display: 'block' }}
+            ></canvas>
+            <form method="POST" onSubmit={handleSubmit}>
+                <button type="submit">Create Project</button>
+            </form>
+            {posRes && <p>{posRes}</p>}
+            <p>{res}</p>
+        </section>
+    );
+};
+
+export default Project;

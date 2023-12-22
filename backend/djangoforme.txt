@@ -1,0 +1,7 @@
+venv\Scripts\activate
+python manage.py migrate
+python manage.py runserver
+
+npm run dev
+
+https://github.com/sushil-kamble/django-react-auth
