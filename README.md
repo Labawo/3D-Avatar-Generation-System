@@ -36,13 +36,31 @@ venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
+### 4. Database
 
-### 4. Run the server
+if you want to run it on MySQL
+```bash
+pip install mysqlclient
+```
+
+if you do not wish it change setting.py file DATABASE variable to:
+```bash
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',  # Database engine
+        'NAME': BASE_DIR / 'db.sqlite3',  # Database file path
+    }
+}
+```
+
+### 5. Run the server
 
 ```bash
 python manage.py migrate
 python manage.py runserver
 ```
+
+
 
 ## Frontend
 
