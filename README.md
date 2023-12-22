@@ -13,7 +13,7 @@ This system lets users upload images and put their face on the avatar that you c
 - Type the following command to clone project in same directory.
 
 ```bash
-git clone https://github.com/sushil-kamble/django-react-auth.git .
+git clone https://github.com/Labawo/3D-Avatar-Generation-System.git .
 ```
 
 ## Backend
